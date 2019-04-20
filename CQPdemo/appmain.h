@@ -1,2 +1,4 @@
-#define CQAPPID "com.example.democ" //ÇëĞŞ¸ÄAppID£¬¹æÔò¼û http://d.cqp.me/Pro/¿ª·¢/»ù´¡ĞÅÏ¢
+#pragma once
+#define CQAPPID "top.baidu.qq_random_bot" //è¯·ä¿®æ”¹AppIDï¼Œè§„åˆ™è§ http://d.cqp.me/Pro/å¼€å‘/åŸºç¡€ä¿¡æ¯
 #define CQAPPINFO CQAPIVERTEXT "," CQAPPID
+#include"PublicRely.h"
