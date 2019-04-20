@@ -28,7 +28,8 @@ group::group(void) { ; }
 group::~group(void) { ; }
 std::string operate::excute(const std::string& msg, int64_t group, int64_t user)
 {
-	if (!NeedAdmin || IsAdmin(user, NeedSuperviser))
+	CQ_addLog(ac, CQLOG_DEBUG, "Frame", "excute");
+	if (function!=NULL&&(!NeedAdmin || IsAdmin(user, NeedSuperviser)))
 	{
 		std::string arg;
 		std::stringstream ss;

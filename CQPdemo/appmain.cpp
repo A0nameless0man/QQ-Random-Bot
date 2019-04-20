@@ -55,7 +55,7 @@ CQEVENT(int32_t, __eventEnable, 0)() {
 	Options.Operate.insert(std::pair<std::string, operate>("addmember", operate(i++, true, addmember)));
 	Options.Operate.insert(std::pair<std::string, operate>("removemember", operate(i++, true, NoThing)));
 	Options.Operate.insert(std::pair<std::string, operate>("reffer", operate(i++, false,reffer)));
-	Options.Operate.insert(std::pair<std::string, operate>("shownamelist", operate(i++, false)));
+	Options.Operate.insert(std::pair<std::string, operate>("shownamelist", operate(i++, false,ListLucky)));
 	Options.Operate.insert(std::pair<std::string, operate>("help", operate(i++, false, Help)));
 	Options.Admins.insert(1395943920);
 	return 0;
@@ -98,6 +98,7 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fr
 		std::stringstream Op;
 		Op << Operate;
 		Op >> commend;//从信息分离出指令
+		CQ_addLog(ac, CQLOG_DEBUG, "msg", commend.c_str());
 		std::map<std::string, operate>::iterator iter;
 		iter = Options.Operate.find(commend);
 		if (iter != Options.Operate.end())

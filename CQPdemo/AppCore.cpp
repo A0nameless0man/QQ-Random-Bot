@@ -154,6 +154,10 @@ std::string addmember(const Argus & arg, int64_t groupid, int64_t user)
 			}
 			else
 			{
+				if (groups.find(groupid)==groups.end())
+				{
+					groups.insert(std::pair<int64_t, group>(groupid, group()));
+				}
 				group& currentGroup = groups[groupid];
 				for (; from < to; from++)
 				{
