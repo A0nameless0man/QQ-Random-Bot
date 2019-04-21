@@ -10,5 +10,6 @@
 #include<map>
 #include<vector>
 #include<random>
+#include<ctime>
 #include"BigInt.h"
 #include "cqp.h"

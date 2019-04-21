@@ -11,12 +11,15 @@ namespace bit
 	using Digt = int;
 	using singleDigt = short;
 	using IntStore = std::vector<singleDigt>;
+
 	const Pos BIN = 2;
 	const Pos OCT = 8;
 	const Pos DEC = 10;
 	const Pos HXE = 16;
+
 	char itoc(int);
 	int ctoi(char);
+
 	class BigInt
 	{
 	public:

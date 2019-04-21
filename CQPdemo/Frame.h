@@ -20,6 +20,7 @@ private:
 	bool NeedSuperviser;
 	Function function;
 };
+
 struct options
 {
 	std::set<unsigned long long int> Admins;
@@ -33,12 +34,13 @@ public:
 	bool operator < (const member b)const;
 	std::string getID(void)const;
 	std::string getName(void)const;
-	bool Choseable(void);
+	bool Choseable(void)const;
 private:
 	bit::BigInt StID;
 	std::string Name;
 	bool CanBeChose;
 };
+
 class group
 {
 public:
@@ -47,5 +49,3 @@ public:
 	group(void);
 	~group(void);
 };
-
-

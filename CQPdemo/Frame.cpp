@@ -20,12 +20,16 @@ std::string member::getName(void)const
 	return Name;
 }
 
-bool member::Choseable(void)
+bool member::Choseable(void)const
 {
 	return CanBeChose;
 }
+
+
 group::group(void) { ; }
 group::~group(void) { ; }
+
+
 std::string operate::excute(const std::string& msg, int64_t group, int64_t user)
 {
 	CQ_addLog(ac, CQLOG_DEBUG, "Frame", "excute");
@@ -39,7 +43,16 @@ std::string operate::excute(const std::string& msg, int64_t group, int64_t user)
 		{
 			argus.push_back(arg);
 		}
-		return function(argus, group, user);
+		std::string Reply;
+		try
+		{
+			Reply+= function(argus, group, user);
+		}
+		catch (const std::exception& e)
+		{
+			Reply += e.what();
+		}
+		return Reply;
 	}
 	else
 	{
@@ -47,14 +60,18 @@ std::string operate::excute(const std::string& msg, int64_t group, int64_t user)
 	}
 
 }
+
+
 bool IsManager(int64_t user)
 {
 	return false;
 }
+
 bool IsAdmin(int64_t user, bool NeedSuperViser)
 {
 	return (Options.Admins.count(user) == 1) || !NeedSuperViser && IsManager(user);
 }
+
 std::string NoThing(const Argus& arg, int64_t group, int64_t user)
 {
 	std::string Reply;
@@ -72,6 +89,7 @@ std::string NoThing(const Argus& arg, int64_t group, int64_t user)
 	}
 	return Reply;
 }
+
 std::string VoidOperate(const std::string& msg, int64_t group, int64_t user)
 {
 	std::string Reply;
@@ -82,4 +100,3 @@ std::string VoidOperate(const std::string& msg, int64_t group, int64_t user)
 	Reply += "是无效命令或者您的权限不足，请使用help命令查询可用命令。";
 	return Reply;
 }
-

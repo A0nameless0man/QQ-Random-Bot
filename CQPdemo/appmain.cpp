@@ -52,10 +52,11 @@ CQEVENT(int32_t, __eventEnable, 0)() {
 	int i = 0;
 	Options.Operate.insert(std::pair<std::string, operate>("start", operate(i++, true, Start)));
 	Options.Operate.insert(std::pair<std::string, operate>("clear", operate(i++, true, Clear)));
-	Options.Operate.insert(std::pair<std::string, operate>("addmember", operate(i++, true, addmember)));
-	Options.Operate.insert(std::pair<std::string, operate>("removemember", operate(i++, true, NoThing)));
+	Options.Operate.insert(std::pair<std::string, operate>("addMember", operate(i++, true, addmember)));
+	Options.Operate.insert(std::pair<std::string, operate>("removeMember", operate(i++, true, NoThing)));
 	Options.Operate.insert(std::pair<std::string, operate>("reffer", operate(i++, false,reffer)));
-	Options.Operate.insert(std::pair<std::string, operate>("shownamelist", operate(i++, false,ListLucky)));
+	Options.Operate.insert(std::pair<std::string, operate>("showLuckyList", operate(i++, false,ListLucky)));
+	Options.Operate.insert(std::pair<std::string, operate>("ListLucky", operate(i++, false, ListLucky)));
 	Options.Operate.insert(std::pair<std::string, operate>("help", operate(i++, false, Help)));
 	Options.Admins.insert(1395943920);
 	return 0;
@@ -109,7 +110,7 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fr
 		{
 			reply += VoidOperate(commend, fromGroup, fromQQ);
 		}
-		CQ_sendPrivateMsg(ac, fromQQ, reply.c_str());
+		//CQ_sendPrivateMsg(ac, fromQQ, reply.c_str());
 		CQ_sendGroupMsg(ac, fromGroup, reply.c_str());
 		return EVENT_BLOCK;
 	}
