@@ -59,6 +59,7 @@ CQEVENT(int32_t, __eventEnable, 0)() {
 	Options.Operate.insert(std::pair<std::string, operate>("ListLucky", operate(i++, false, ListLucky)));
 	Options.Operate.insert(std::pair<std::string, operate>("help", operate(i++, false, Help)));
 	Options.Admins.insert(1395943920);
+	Options.Admins.insert(1104802316);
 	return 0;
 }
 
