@@ -6,7 +6,7 @@
 #include "stdafx.h"
 #include"appmain.h"
 #include"AppCore.h"
-extern options Options;
+extern Options options;
 int ac = -1; //AuthCode 调用酷Q的方法时需要用到
 bool enabled = false;
 /*
@@ -23,24 +23,8 @@ CQEVENT(int32_t, Initialize, 4)(int32_t AuthCode) {
 	ac = AuthCode;
 	return 0;
 }
-/*
-* Type=1001 酷Q启动
-* 无论本应用是否被启用，本函数都会在酷Q启动后执行一次，请在这里执行应用初始化代码。
-* 如非必要，不建议在这里加载窗口。（可以添加菜单，让用户手动打开窗口）
-*/
-CQEVENT(int32_t, __eventStartup, 0)() {
 
-	return 0;
-}
-/*
-* Type=1002 酷Q退出
-* 无论本应用是否被启用，本函数都会在酷Q退出前执行一次，请在这里执行插件关闭代码。
-* 本函数调用完毕后，酷Q将很快关闭，请不要再通过线程等方式执行其他代码。
-*/
-CQEVENT(int32_t, __eventExit, 0)() {
 
-	return 0;
-}
 /*
 * Type=1003 应用已被启用
 * 当应用被启用后，将收到此事件。
@@ -49,16 +33,8 @@ CQEVENT(int32_t, __eventExit, 0)() {
 */
 CQEVENT(int32_t, __eventEnable, 0)() {
 	enabled = true;
-	int i = 0;
-	Options.Operate.insert(std::pair<std::string, operate>("start", operate(i++, true, Start)));
-	Options.Operate.insert(std::pair<std::string, operate>("clear", operate(i++, true, Clear)));
-	Options.Operate.insert(std::pair<std::string, operate>("addMember", operate(i++, true, addmember)));
-	Options.Operate.insert(std::pair<std::string, operate>("removeMember", operate(i++, true, NoThing)));
-	Options.Operate.insert(std::pair<std::string, operate>("reffer", operate(i++, false,reffer)));
-	Options.Operate.insert(std::pair<std::string, operate>("showLuckyList", operate(i++, false,ListLucky)));
-	Options.Operate.insert(std::pair<std::string, operate>("ListLucky", operate(i++, false, ListLucky)));
-	Options.Operate.insert(std::pair<std::string, operate>("help", operate(i++, false, Help)));
-	Options.Admins.insert(1395943920);
+	loadCommand();
+	loadAdmin();
 	return 0;
 }
 
@@ -71,6 +47,8 @@ CQEVENT(int32_t, __eventEnable, 0)() {
 */
 CQEVENT(int32_t, __eventDisable, 0)() {
 	enabled = false;
+	saveGroups();
+	saveAdmin();
 	return 0;
 }
 
@@ -94,21 +72,19 @@ CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fr
 	if (*msg == '#')
 	{
 		std::string	reply;
-		std::string Operate = msg + 1;
+		std::string operate = msg + 1;
 		std::string commend;
 		std::stringstream Op;
-		Op << Operate;
+		Op << operate;
 		Op >> commend;//从信息分离出指令
 		CQ_addLog(ac, CQLOG_DEBUG, "msg", commend.c_str());
-		std::map<std::string, operate>::iterator iter;
-		iter = Options.Operate.find(commend);
-		if (iter != Options.Operate.end())
+		if (options.isCommand(commend))
 		{
-			reply += iter->second.excute(std::string(msg), fromGroup, fromQQ);
+			reply += options.tryExcuteCommend(commend, operate, fromGroup, fromQQ);
 		}
 		else
 		{
-			reply += VoidOperate(commend, fromGroup, fromQQ);
+			reply += voidOperate(commend, fromGroup, fromQQ);
 		}
 		//CQ_sendPrivateMsg(ac, fromQQ, reply.c_str());
 		CQ_sendGroupMsg(ac, fromGroup, reply.c_str());
@@ -129,18 +105,18 @@ CQEVENT(int32_t, __eventDiscussMsg, 32)(int32_t subType, int32_t msgId, int64_t 
 	if (*msg == '#')
 	{
 		string	reply;
-		string Operate = msg + 1;
+		string operates = msg + 1;
 		string commend;
 		stringstream Op;
-		Op << Operate;
+		Op << operates;
 		Op >> commend;
-		getline(Op, Operate);
-		if (Options.Operate.count(commend) == 1)
+		getline(Op, operates);
+		if (options.operates.count(commend) == 1)
 		{
 			if (groups.count(fromGroup) != 0)
 			{
-				map<string, operate>::iterator iter;
-				for (iter = Options.Operate.begin(); iter != Options.Operate.end(); iter++)
+				map<string, Operate>::iterator iter;
+				for (iter = options.operates.begin(); iter != options.operates.end(); iter++)
 				{
 					CQ_addLog(ac, CQLOG_DEBUG, "breakpoint", iter->first.c_str());
 					if (iter->first == commend)
@@ -162,7 +138,7 @@ CQEVENT(int32_t, __eventDiscussMsg, 32)(int32_t subType, int32_t msgId, int64_t 
 			}
 			else
 			{
-				groups.insert(pair<int64_t, group>(fromGroup, group()));
+				groups.insert(pair<int64_t, Group>(fromGroup, Group()));
 				reply += "已为您开通抽签容器，请重试。";
 			}
 			CQ_sendPrivateMsg(ac, fromQQ, reply.c_str());
@@ -170,7 +146,7 @@ CQEVENT(int32_t, __eventDiscussMsg, 32)(int32_t subType, int32_t msgId, int64_t 
 		}
 		else
 		{
-			VoidOperate(msg, fromGroup, fromQQ);
+			voidOperate(msg, fromGroup, fromQQ);
 		}
 		return EVENT_BLOCK;
 	}

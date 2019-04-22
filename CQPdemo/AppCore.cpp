@@ -1,71 +1,101 @@
 #include "stdafx.h"
 #include"AppCore.h"
 extern int ac;
-extern options Options;
-std::map<int64_t, group> groups;
+extern Options options;
+
+std::map<GroupID, Group> groups;
 const std::string standHelp = "help";
-std::string Help(const Argus& arg, int64_t group, int64_t user)
+
+void loadCommand(void)
 {
-	std::string Reply;
+	options.addCommand("start", Operate(true, start));
+	options.addCommand("clear", Operate(true, clear));
+	options.addCommand("addMember", Operate(true, addmember));
+	options.addCommand("removeMember", Operate(true, noThing));
+	options.addCommand("reffer", Operate(false, reffer));
+	options.addCommand("showLuckyList", Operate(false, listLucky));
+	options.addCommand("ListLucky", Operate(false, listLucky));
+	options.addCommand("help", Operate(false, help));
+	return;
+}
+
+void loadAdmin(void)
+{
+	options.addAdmin(1395943920);
+	return;
+}
+
+void loadGroups(void)
+{
+	;
+}
+
+void saveAdmin(void)
+{
+	;
+}
+
+void saveGroups(void)
+{
+	;
+}
+
+std::string help(const Argus& arg, GroupID group, UserID user)
+{
+	std::string reply;
 	CQ_addLog(ac, CQLOG_DEBUG, "funrun", "help");
-	if (arg.size()==1)
+	if (arg.size() == 1)
 	{
 		CQ_addLog(ac, CQLOG_DEBUG, "funrun", "commen help");
-		Reply += "欢迎使用随机抽签系统\n";
-		Reply += "所有命令前需带'#'\n";
-		Reply += "通用格式为：\"#命令 参数\"\n";
-		Reply += "此外，您可以使用以下命令：";
-		for (auto it = Options.Operate.begin();it!=Options.Operate.end();it++)
+		reply += "欢迎使用随机抽签系统\n";
+		reply += "所有命令前需带'#'\n";
+		reply += "通用格式为：\"#命令 参数\"\n";
+		reply += "此外，您可以使用以下命令：";
+		CommendList tempList = options.getCommendList();
+		for (auto it = tempList.begin(); it != tempList.end(); it++)
 		{
-				Reply += "\""; Reply += it->first; Reply += "\"	";
-				Reply += "ID："; Reply += std::to_string(it->second.ID); Reply += "\n";
+			reply += "\""; reply += it->first; reply += "\"	";
+			//reply += "ID："; reply += std::to_string(it->second.ID); reply += "\n";
 		}
-		Reply += "如需具体命令的说明，请将其作为help命令的参数。\n";
-		Reply += "或者直接使用\"#命令 "+standHelp+"\"";
+		reply += "如需具体命令的说明，请将其作为help命令的参数。\n";
+		reply += "或者直接使用\"#命令 " + standHelp + "\"";
 	}
 	else
 	{
 		CQ_addLog(ac, CQLOG_DEBUG, "funrun", "commend help");
-		std::map<std::string, operate>::iterator iter;
-		for (size_t i =1; i < arg.size(); i++)
+		std::map<std::string, Operate>::iterator iter;
+		for (size_t i = 1; i < arg.size(); i++)
 		{
-			iter = Options.Operate.find(arg[i]);
-			if (iter!=Options.Operate.end())
-			{
-				Reply += iter->second.excute(iter->first + " " + standHelp, group, user) + "\n";
-			}
+			reply += options.tryExcuteCommend(arg[i], arg[i] + standHelp, group, user);
 		}
 	}
-	return Reply;
+	return reply;
 }
 
-std::string Start(const Argus& arg, int64_t groupid, int64_t user)
+std::string start(const Argus& arg, GroupID groupid, UserID user)
 {
-	
-	std::string Reply;
+
+	std::string reply;
 	CQ_addLog(ac, CQLOG_DEBUG, "funrun", "start");
-	if (arg.size() < 2||arg[1]==standHelp)
+	if (arg.size() < 2 || arg[1] == standHelp)
 	{
-		Reply += "开始抽签\n参数为抽取人数\n默认为1";
+		reply += "开始抽签\n参数为抽取人数\n默认为1";
 	}
 	else
 	{
-		std::map<int64_t, group>::iterator iter_group = groups.find(groupid);
-		if (iter_group!=groups.end())
+		std::map<GroupID, Group>::iterator iter_group = groups.find(groupid);
+		if (iter_group != groups.end())
 		{
-			srand(time(NULL));
-			group& currentGroup = iter_group->second;
-			std::vector<member> randlist;
+			srand((unsigned int)time(NULL));
+			Group& currentGroup = iter_group->second;
+			std::vector<Member> randlist;
 			int num = 0;
-			currentGroup.Chosen.clear();
-			for (std::set<member>::iterator i = currentGroup.NameList.begin(); i != currentGroup.NameList.end(); i++)
+			//currentGroup.chosen.clear();
+			for (auto u: currentGroup.getNameList(true))
 			{
-				if (i->Choseable())
-				{
-					randlist.push_back(*i);
-				}
-			}//加载抽签名单
-			if (arg.size()==2)
+				randlist.push_back(u);
+			}
+			if (arg.size() == 2)
 			{
 				std::stringstream Op;
 				Op << arg[1];
@@ -77,36 +107,38 @@ std::string Start(const Argus& arg, int64_t groupid, int64_t user)
 				num = 1;
 			}//默认为1
 			std::random_shuffle(randlist.begin(), randlist.end());
-			Reply += "计划抽取人数:" + std::to_string(num) +"\n班级人数:"+std::to_string(currentGroup.NameList.size())+ "\n实际可抽取人数:" + std::to_string(randlist.size()) + "\n";
-			for (size_t i = 0; i < num && i<randlist.size(); i++)
+			reply += "计划抽取人数:" + std::to_string(num) + "\n班级人数:" + std::to_string(currentGroup.size()) + "\n实际可抽取人数:" + std::to_string(randlist.size()) + "\n";
+			NameList result;
+			for (int i = 0; i < num && i < (int)randlist.size(); i++)
 			{
-				member &luckyguy = randlist[i];
-				currentGroup.Chosen.insert(luckyguy);
+				Member& luckyguy = randlist[i];
+				result.insert(luckyguy);
 			}
-			Reply += ListLucky(Argus(), groupid, user);
+			currentGroup.setChosen(result);
+			reply += listLucky(Argus(), groupid, user);
 		}
 		else
 		{
-			Reply += "没有成员名单,请创建后重试";
+			reply += "没有成员名单,请创建后重试";
 		}
 
 	}
-	return Reply;
+	return reply;
 }
 
-std::string Clear(const Argus & arg, int64_t groupid, int64_t user)
+std::string clear(const Argus& arg, GroupID groupid, UserID user)
 {
 	std::string Reply;
 	std::stringstream Op;
 	CQ_addLog(ac, CQLOG_DEBUG, "funrun", "CL");
-	if (arg.size()==2&&arg[1]==standHelp)
+	if (arg.size() == 2 && arg[1] == standHelp)
 	{
 		Reply += "清空抽签池\n参数为群号\n无参数则默认为本群";
 	}
 	else
 	{
-		int64_t id = 0;//不能转换时返回0
-		if (arg.size()==2)
+		GroupID id = 0;//不能转换时返回0
+		if (arg.size() == 2)
 		{
 			Op << arg[1];
 			Op >> id;
@@ -116,7 +148,7 @@ std::string Clear(const Argus & arg, int64_t groupid, int64_t user)
 		{
 			id = groupid;
 		}
-		if (IsAdmin(user,true))
+		if (options.isAdmin(user,groupid, true))
 		{
 			try
 			{
@@ -130,20 +162,20 @@ std::string Clear(const Argus & arg, int64_t groupid, int64_t user)
 		}
 		else
 		{
-			VoidOperate(arg[0], groupid, user);
+			voidOperate(arg[0], groupid, user);
 		}
 
 	}
 	return Reply;
 }
 
-std::string addmember(const Argus & arg, int64_t groupid, int64_t user)
+std::string addmember(const Argus& arg, GroupID groupid, UserID user)
 {
 	CQ_addLog(ac, CQLOG_DEBUG, "funrun", "addmem");
 	std::string Reply;
 	std::stringstream Op;
 	int incount = 0;
-	if (arg.size()<2||arg[1]==standHelp)
+	if (arg.size() < 2 || arg[1] == standHelp)
 	{
 		Reply += "添加抽签人员\n可以\"#addmember \'号码\' \' 名字\'\n也可以#addmember range \'起始号码\' \' 终止号码\'\"";
 	}
@@ -151,10 +183,12 @@ std::string addmember(const Argus & arg, int64_t groupid, int64_t user)
 	{
 		if (groups.find(groupid) == groups.end())
 		{
-			groups.insert(std::pair<int64_t, group>(groupid, group()));
+			//Group temp();
+			//groups.insert(std::pair<GroupID, Group>(groupid, Group()));
+			groups[groupid];
 		}
-		group& currentGroup = groups[groupid];
-		if (arg.size()==4&&arg[1]=="range")
+		Group& currentGroup = groups[groupid];
+		if (arg.size() == 4 && arg[1] == "range")
 		{
 			CQ_addLog(ac, CQLOG_DEBUG, "funrun", "addmem by range");
 			bit::BigInt from, to;
@@ -162,15 +196,15 @@ std::string addmember(const Argus & arg, int64_t groupid, int64_t user)
 			Op >> from;
 			Op << arg[3];
 			Op << to;
-			if (Op||to<from)
+			if (Op || to < from)
 			{
-				VoidOperate(arg[0], groupid, user);
+				voidOperate(arg[0], groupid, user);
 			}
 			else
 			{
 				for (; from < to; from++)
 				{
-					currentGroup.NameList.insert(member(from));
+					currentGroup.addMember(Member(from));
 					incount++;
 				}
 			}
@@ -178,90 +212,90 @@ std::string addmember(const Argus & arg, int64_t groupid, int64_t user)
 		else
 		{
 			CQ_addLog(ac, CQLOG_DEBUG, "funrun", "addmem by data");
-			if ((arg.size() - 1)%2==0)
+			if ((arg.size() - 1) % 2 == 0)
 			{
 				bit::BigInt i;
 				std::string name;
 
-				for (size_t j = 1; j < arg.size(); j+=2)
+				for (size_t j = 1; j < arg.size(); j += 2)
 				{
 					Op << arg[j];
 					Op >> i;
 					Op.clear();
 					name = arg[j + 1];
-					//Reply += "学号：";
-					//Reply += i.string();
+					//reply += "学号：";
+					//reply += i.string();
 					//if (name.length() > 0)
 					//{
-					//	Reply += "	姓名：";
-					//	Reply += name;
+					//	reply += "	姓名：";
+					//	reply += name;
 					//}
-					//Reply += "\n";
-					currentGroup.NameList.insert(member(i, name));
+					//reply += "\n";
+					currentGroup.addMember(Member(i, name));
 					incount++;
 				}
 			}
 		}
-		Reply += "已添加:" + std::to_string(incount) + "人\n" + "班级现有:" + std::to_string(currentGroup.NameList.size()) + "人\n";
+		Reply += "已添加:" + std::to_string(incount) + "人\n" + "班级现有:" + std::to_string(currentGroup.size()) + "人\n";
 	}
 	return Reply;
 }
 
-std::string reffer(const Argus& arg, int64_t groupid, int64_t user)
+std::string reffer(const Argus& arg, GroupID groupid, UserID user)
 {
-	std::string Reply;
+	std::string reply;
 	std::stringstream Op;
 	if (arg.size() < 2 || arg[1] == standHelp)
 	{
-		Reply += "查找幸运儿\n参数为查询目标的ID";
+		reply += "查找幸运儿\n参数为查询目标的ID";
 	}
 	else
 	{
-		std::map<int64_t, group>::iterator iter = groups.find(groupid);
+		std::map<int64_t, Group>::iterator iter = groups.find(groupid);
 		if (iter != groups.end())
 		{
-			group& currentGroup = iter->second;
+			Group& currentGroup = iter->second;
 			bit::BigInt tar = 0;
 			bool IsLucky = false;
 			Op << arg[1];
 			Op >> tar;
-			if (IsAdmin(user, false))
+			if (options.isAdmin(user,groupid ,false))
 			{
-				IsLucky = (iter->second.Chosen.count(tar) == 1);
-				Reply += "所查询的用户"; if (IsLucky) Reply += "是"; else Reply += "不是"; Reply += "幸运儿";
-
+				reply += "所查询的用户"; if (currentGroup.isLucky(tar)) reply += "是"; else reply += "不是"; reply += "幸运儿";
 			}
 			else
 			{
-				Reply+= VoidOperate(arg[0], groupid, user);
+				reply += voidOperate(arg[0], groupid, user);
 			}
 		}
 		else
 		{
-			Reply += "";//TODO
+			reply += "";//TODO
 		}
 	}
-	return Reply;
+	return reply;
 }
 
-std::string ListLucky(const Argus& arg, int64_t groupid, int64_t user)
+std::string listLucky(const Argus & arg, GroupID groupid, UserID user)
 {
 
 	std::string Reply;
 	CQ_addLog(ac, CQLOG_DEBUG, "funrun", "List");
-	if (arg.size() >1 && arg[1] == standHelp)
+	if (arg.size() > 1 && arg[1] == standHelp)
 	{
 		Reply += "查询本群所有中签者\n无需参数";
 	}
 	else
 	{
-		std::map<int64_t, group>::iterator iter_group = groups.find(groupid);
+		std::map<int64_t, Group>::iterator iter_group = groups.find(groupid);
 		if (iter_group != groups.end())
 		{
-			group& currentGroup = iter_group->second;
+			Group& currentGroup = iter_group->second;
 			Reply += "以下人员中签：\n";
-			for (auto meb:currentGroup.Chosen)
+			int count = 0;
+			for (auto meb : currentGroup.getChosen())
 			{
+				count++;
 				Reply += "学号：";
 				Reply += meb.getID();
 				if (meb.getName().length() > 0)
@@ -271,7 +305,7 @@ std::string ListLucky(const Argus& arg, int64_t groupid, int64_t user)
 				}
 				Reply += "\n";
 			}
-			Reply += "共" + std::to_string(currentGroup.Chosen.size()) + "人中签";
+			Reply += "共" + std::to_string(count) + "人中签";
 		}
 		else
 		{

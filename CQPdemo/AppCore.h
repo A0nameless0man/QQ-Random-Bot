@@ -3,9 +3,16 @@
 #include "stdafx.h"
 #include"Frame.h"
 
-std::string Help(const Argus& arg, int64_t group, int64_t user);
-std::string Start(const Argus& arg, int64_t groupid, int64_t user);
-std::string Clear(const Argus& arg, int64_t groupid, int64_t user);
-std::string addmember(const Argus& arg, int64_t groupid, int64_t user);
-std::string reffer(const Argus& arg, int64_t groupid, int64_t user);
-std::string ListLucky(const Argus& arg, int64_t groupid, int64_t user);
+void loadCommand(void);
+void loadAdmin(void);
+void loadGroups(void);
+void saveAdmin(void);
+void saveGroups(void);
+
+
+std::string help(const Argus& arg, GroupID group, UserID user);
+std::string start(const Argus& arg, GroupID groupid, UserID user);
+std::string clear(const Argus& arg, GroupID groupid, UserID user);
+std::string addmember(const Argus& arg, GroupID groupid, UserID user);
+std::string reffer(const Argus& arg, GroupID groupid, UserID user);
+std::string listLucky(const Argus& arg, GroupID groupid, UserID user);
