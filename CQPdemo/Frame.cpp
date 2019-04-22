@@ -30,7 +30,12 @@ group::group(void) { ; }
 group::~group(void) { ; }
 
 
-std::string operate::excute(const std::string& msg, int64_t group, int64_t user)
+operate::operate(int id, bool na, Function function) :ID(id), NeedAdmin(na), NeedSuperviser(false), function(function)
+{ 
+	; 
+}
+
+std::string operate::excute(const std::string& msg, GroupID group, UserID user)
 {
 	CQ_addLog(ac, CQLOG_DEBUG, "Frame", "excute");
 	if (function!=NULL&&(!NeedAdmin || IsAdmin(user, NeedSuperviser)))
@@ -62,17 +67,17 @@ std::string operate::excute(const std::string& msg, int64_t group, int64_t user)
 }
 
 
-bool IsManager(int64_t user)
+bool IsManager(UserID user)
 {
 	return false;
 }
 
-bool IsAdmin(int64_t user, bool NeedSuperViser)
+bool IsAdmin(UserID user, bool NeedSuperViser)
 {
 	return (Options.Admins.count(user) == 1) || !NeedSuperViser && IsManager(user);
 }
 
-std::string NoThing(const Argus& arg, int64_t group, int64_t user)
+std::string NoThing(const Argus& arg, GroupID group, UserID user)
 {
 	std::string Reply;
 	if (!arg.empty())
@@ -90,7 +95,7 @@ std::string NoThing(const Argus& arg, int64_t group, int64_t user)
 	return Reply;
 }
 
-std::string VoidOperate(const std::string& msg, int64_t group, int64_t user)
+std::string VoidOperate(const std::string& msg, GroupID group, UserID user)
 {
 	std::string Reply;
 	CQ_addLog(ac, CQLOG_DEBUG, "voidCOMMEND", ("user=" + std::to_string(user) + ";InGroup:" + std::to_string(group) + "withCOMMEND:" + msg).c_str());

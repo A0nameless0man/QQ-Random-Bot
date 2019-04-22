@@ -30,7 +30,10 @@ std::string Help(const Argus& arg, int64_t group, int64_t user)
 		for (size_t i =1; i < arg.size(); i++)
 		{
 			iter = Options.Operate.find(arg[i]);
-			Reply+=iter->second.excute(iter->first + " "+standHelp, group, user);
+			if (iter!=Options.Operate.end())
+			{
+				Reply += iter->second.excute(iter->first + " " + standHelp, group, user) + "\n";
+			}
 		}
 	}
 	return Reply;
