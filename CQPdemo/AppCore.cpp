@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include"AppCore.h"
+#include"PublicRely.h"
 extern int ac;
 extern Options options;
 
@@ -47,18 +48,18 @@ std::string help(const Argus& arg, GroupID group, UserID user)
 	if (arg.size() == 1)
 	{
 		CQ_addLog(ac, CQLOG_DEBUG, "funrun", "commen help");
-		reply += "»¶Ó­Ê¹ÓÃËæ»ú³éÇ©ÏµÍ³\n";
-		reply += "ËùÓĞÃüÁîÇ°Ğè´ø'#'\n";
-		reply += "Í¨ÓÃ¸ñÊ½Îª£º\"#ÃüÁî ²ÎÊı\"\n";
-		reply += "´ËÍâ£¬Äú¿ÉÒÔÊ¹ÓÃÒÔÏÂÃüÁî£º";
+		reply += "æ¬¢è¿ä½¿ç”¨éšæœºæŠ½ç­¾ç³»ç»Ÿ\n";
+		reply += "æ‰€æœ‰å‘½ä»¤å‰éœ€å¸¦'#'\n";
+		reply += "é€šç”¨æ ¼å¼ä¸ºï¼š\"#å‘½ä»¤ å‚æ•°\"\n";
+		reply += "æ­¤å¤–ï¼Œæ‚¨å¯ä»¥ä½¿ç”¨ä»¥ä¸‹å‘½ä»¤ï¼š";
 		CommendList tempList = options.getCommendList();
 		for (auto it = tempList.begin(); it != tempList.end(); it++)
 		{
 			reply += "\""; reply += it->first; reply += "\"	";
-			//reply += "ID£º"; reply += std::to_string(it->second.ID); reply += "\n";
+			//reply += "IDï¼š"; reply += std::to_string(it->second.ID); reply += "\n";
 		}
-		reply += "ÈçĞè¾ßÌåÃüÁîµÄËµÃ÷£¬Çë½«Æä×÷ÎªhelpÃüÁîµÄ²ÎÊı¡£\n";
-		reply += "»òÕßÖ±½ÓÊ¹ÓÃ\"#ÃüÁî " + standHelp + "\"";
+		reply += "å¦‚éœ€å…·ä½“å‘½ä»¤çš„è¯´æ˜ï¼Œè¯·å°†å…¶ä½œä¸ºhelpå‘½ä»¤çš„å‚æ•°ã€‚\n";
+		reply += "æˆ–è€…ç›´æ¥ä½¿ç”¨\"#å‘½ä»¤ " + standHelp + "\"";
 	}
 	else
 	{
@@ -79,7 +80,7 @@ std::string start(const Argus& arg, GroupID groupid, UserID user)
 	CQ_addLog(ac, CQLOG_DEBUG, "funrun", "start");
 	if (arg.size() < 2 || arg[1] == standHelp)
 	{
-		reply += "¿ªÊ¼³éÇ©\n²ÎÊıÎª³éÈ¡ÈËÊı\nÄ¬ÈÏÎª1";
+		reply += "å¼€å§‹æŠ½ç­¾\nå‚æ•°ä¸ºæŠ½å–äººæ•°\né»˜è®¤ä¸º1";
 	}
 	else
 	{
@@ -105,9 +106,9 @@ std::string start(const Argus& arg, GroupID groupid, UserID user)
 			if (num == 0)
 			{
 				num = 1;
-			}//Ä¬ÈÏÎª1
+			}//é»˜è®¤ä¸º1
 			std::random_shuffle(randlist.begin(), randlist.end());
-			reply += "¼Æ»®³éÈ¡ÈËÊı:" + std::to_string(num) + "\n°à¼¶ÈËÊı:" + std::to_string(currentGroup.size()) + "\nÊµ¼Ê¿É³éÈ¡ÈËÊı:" + std::to_string(randlist.size()) + "\n";
+			reply += "è®¡åˆ’æŠ½å–äººæ•°:" + std::to_string(num) + "\nç­çº§äººæ•°:" + std::to_string(currentGroup.size()) + "\nå®é™…å¯æŠ½å–äººæ•°:" + std::to_string(randlist.size()) + "\n";
 			NameList result;
 			for (int i = 0; i < num && i < (int)randlist.size(); i++)
 			{
@@ -119,7 +120,7 @@ std::string start(const Argus& arg, GroupID groupid, UserID user)
 		}
 		else
 		{
-			reply += "Ã»ÓĞ³ÉÔ±Ãûµ¥,Çë´´½¨ºóÖØÊÔ";
+			reply += "æ²¡æœ‰æˆå‘˜åå•,è¯·åˆ›å»ºåé‡è¯•";
 		}
 
 	}
@@ -133,11 +134,11 @@ std::string clear(const Argus& arg, GroupID groupid, UserID user)
 	CQ_addLog(ac, CQLOG_DEBUG, "funrun", "CL");
 	if (arg.size() == 2 && arg[1] == standHelp)
 	{
-		Reply += "Çå¿Õ³éÇ©³Ø\n²ÎÊıÎªÈººÅ\nÎŞ²ÎÊıÔòÄ¬ÈÏÎª±¾Èº";
+		Reply += "æ¸…ç©ºæŠ½ç­¾æ± \nå‚æ•°ä¸ºç¾¤å·\næ— å‚æ•°åˆ™é»˜è®¤ä¸ºæœ¬ç¾¤";
 	}
 	else
 	{
-		GroupID id = 0;//²»ÄÜ×ª»»Ê±·µ»Ø0
+		GroupID id = 0;//ä¸èƒ½è½¬æ¢æ—¶è¿”å›0
 		if (arg.size() == 2)
 		{
 			Op << arg[1];
@@ -177,7 +178,7 @@ std::string addmember(const Argus& arg, GroupID groupid, UserID user)
 	int incount = 0;
 	if (arg.size() < 2 || arg[1] == standHelp)
 	{
-		Reply += "Ìí¼Ó³éÇ©ÈËÔ±\n¿ÉÒÔ\"#addmember \'ºÅÂë\' \' Ãû×Ö\'\nÒ²¿ÉÒÔ#addmember range \'ÆğÊ¼ºÅÂë\' \' ÖÕÖ¹ºÅÂë\'\"";
+		Reply += "æ·»åŠ æŠ½ç­¾äººå‘˜\nå¯ä»¥\"#addmember \'å·ç \' \' åå­—\'\nä¹Ÿå¯ä»¥#addmember range \'èµ·å§‹å·ç \' \' ç»ˆæ­¢å·ç \'\"";
 	}
 	else
 	{
@@ -223,11 +224,11 @@ std::string addmember(const Argus& arg, GroupID groupid, UserID user)
 					Op >> i;
 					Op.clear();
 					name = arg[j + 1];
-					//reply += "Ñ§ºÅ£º";
+					//reply += "å­¦å·ï¼š";
 					//reply += i.string();
 					//if (name.length() > 0)
 					//{
-					//	reply += "	ĞÕÃû£º";
+					//	reply += "	å§“åï¼š";
 					//	reply += name;
 					//}
 					//reply += "\n";
@@ -236,7 +237,7 @@ std::string addmember(const Argus& arg, GroupID groupid, UserID user)
 				}
 			}
 		}
-		Reply += "ÒÑÌí¼Ó:" + std::to_string(incount) + "ÈË\n" + "°à¼¶ÏÖÓĞ:" + std::to_string(currentGroup.size()) + "ÈË\n";
+		Reply += "å·²æ·»åŠ :" + std::to_string(incount) + "äºº\n" + "ç­çº§ç°æœ‰:" + std::to_string(currentGroup.size()) + "äºº\n";
 	}
 	return Reply;
 }
@@ -247,7 +248,7 @@ std::string reffer(const Argus& arg, GroupID groupid, UserID user)
 	std::stringstream Op;
 	if (arg.size() < 2 || arg[1] == standHelp)
 	{
-		reply += "²éÕÒĞÒÔË¶ù\n²ÎÊıÎª²éÑ¯Ä¿±êµÄID";
+		reply += "æŸ¥æ‰¾å¹¸è¿å„¿\nå‚æ•°ä¸ºæŸ¥è¯¢ç›®æ ‡çš„ID";
 	}
 	else
 	{
@@ -261,7 +262,7 @@ std::string reffer(const Argus& arg, GroupID groupid, UserID user)
 			Op >> tar;
 			if (options.isAdmin(user,groupid ,false))
 			{
-				reply += "Ëù²éÑ¯µÄÓÃ»§"; if (currentGroup.isLucky(tar)) reply += "ÊÇ"; else reply += "²»ÊÇ"; reply += "ĞÒÔË¶ù";
+				reply += "æ‰€æŸ¥è¯¢çš„ç”¨æˆ·"; if (currentGroup.isLucky(tar)) reply += "æ˜¯"; else reply += "ä¸æ˜¯"; reply += "å¹¸è¿å„¿";
 			}
 			else
 			{
@@ -283,7 +284,7 @@ std::string listLucky(const Argus & arg, GroupID groupid, UserID user)
 	CQ_addLog(ac, CQLOG_DEBUG, "funrun", "List");
 	if (arg.size() > 1 && arg[1] == standHelp)
 	{
-		Reply += "²éÑ¯±¾ÈºËùÓĞÖĞÇ©Õß\nÎŞĞè²ÎÊı";
+		Reply += "æŸ¥è¯¢æœ¬ç¾¤æ‰€æœ‰ä¸­ç­¾è€…\næ— éœ€å‚æ•°";
 	}
 	else
 	{
@@ -291,25 +292,25 @@ std::string listLucky(const Argus & arg, GroupID groupid, UserID user)
 		if (iter_group != groups.end())
 		{
 			Group& currentGroup = iter_group->second;
-			Reply += "ÒÔÏÂÈËÔ±ÖĞÇ©£º\n";
+			Reply += "ä»¥ä¸‹äººå‘˜ä¸­ç­¾ï¼š\n";
 			int count = 0;
 			for (auto meb : currentGroup.getChosen())
 			{
 				count++;
-				Reply += "Ñ§ºÅ£º";
+				Reply += "å­¦å·ï¼š";
 				Reply += meb.getID();
 				if (meb.getName().length() > 0)
 				{
-					Reply += "	ĞÕÃû£º";
+					Reply += "	å§“åï¼š";
 					Reply += meb.getName();
 				}
 				Reply += "\n";
 			}
-			Reply += "¹²" + std::to_string(count) + "ÈËÖĞÇ©";
+			Reply += "å…±" + std::to_string(count) + "äººä¸­ç­¾";
 		}
 		else
 		{
-			Reply += "Ã»ÓĞÖĞÇ©Ãûµ¥,Çë¼ì²éºóÖØÊÔ";
+			Reply += "æ²¡æœ‰ä¸­ç­¾åå•,è¯·æ£€æŸ¥åé‡è¯•";
 		}
 	}
 	return Reply;

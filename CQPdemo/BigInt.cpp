@@ -192,11 +192,11 @@ namespace bit
 				{
 					singleDigt mid = (l + r) / 2;
 					if ((b2*mid).absSmaller(rest))
-					{//rest±È½Ï´ó
+					{//restæ¯”è¾ƒå¤§
 						l = mid+1;
 					}
 					else
-					{//rest±È½ÏĞ¡»òÏàµÈ
+					{//restæ¯”è¾ƒå°æˆ–ç›¸ç­‰
 						r = mid;
 					}
 				}

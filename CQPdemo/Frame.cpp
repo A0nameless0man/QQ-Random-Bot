@@ -22,7 +22,7 @@ std::string noThing(const Argus& arg, GroupID group, UserID user)
 		Reply += "\"";
 		Reply += arg[0];
 		Reply += "\"\n";
-		Reply += "Õâ¸ö¹¦ÄÜ»¹Î´Ö§³Ö£¬¾´ÇëÆÚ´ı¡£";
+		Reply += "è¿™ä¸ªåŠŸèƒ½è¿˜æœªæ”¯æŒï¼Œæ•¬è¯·æœŸå¾…ã€‚";
 	}
 	else
 	{
@@ -38,7 +38,7 @@ std::string voidOperate(const std::string & msg, GroupID group, UserID user)
 	Reply += "\"";
 	Reply += msg;
 	Reply += "\"\n";
-	Reply += "ÊÇÎŞĞ§ÃüÁî»òÕßÄúµÄÈ¨ÏŞ²»×ã£¬ÇëÊ¹ÓÃhelpÃüÁî²éÑ¯¿ÉÓÃÃüÁî¡£";
+	Reply += "æ˜¯æ— æ•ˆå‘½ä»¤æˆ–è€…æ‚¨çš„æƒé™ä¸è¶³ï¼Œè¯·ä½¿ç”¨helpå‘½ä»¤æŸ¥è¯¢å¯ç”¨å‘½ä»¤ã€‚";
 	return Reply;
 }
 

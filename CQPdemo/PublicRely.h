@@ -12,5 +12,6 @@
 #include<random>
 #include<ctime>
 #include<mutex>
+#include<algorithm>
 #include"BigInt.h"
 #include "cqp.h"
