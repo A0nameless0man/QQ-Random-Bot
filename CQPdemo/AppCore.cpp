@@ -1,6 +1,7 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include"AppCore.h"
 #include"PublicRely.h"
+
 extern int ac;
 extern Options options;
 
@@ -9,14 +10,14 @@ const std::string standHelp = "help";
 
 void loadCommand(void)
 {
-	options.addCommand("start", Operate(true, start));
-	options.addCommand("clear", Operate(true, clear));
-	options.addCommand("addMember", Operate(true, addmember));
-	options.addCommand("removeMember", Operate(true, noThing));
-	options.addCommand("reffer", Operate(false, reffer));
-	options.addCommand("showLuckyList", Operate(false, listLucky));
-	options.addCommand("ListLucky", Operate(false, listLucky));
-	options.addCommand("help", Operate(false, help));
+	options.addCommand("start", Operate(/*true,*/ start,SLevel::super|SLevel::owner|SLevel::manager));
+	options.addCommand("clear", Operate(/*true,*/ clear,SLevel::super));
+	options.addCommand("addMember", Operate(/*true, */addmember, SLevel::super | SLevel::owner | SLevel::manager));
+	options.addCommand("removeMember", Operate(/*true, */noThing, SLevel::super | SLevel::owner | SLevel::manager));
+	options.addCommand("reffer", Operate(/*false, */reffer, SLevel::super | SLevel::owner | SLevel::manager|SLevel::member));
+	options.addCommand("showLuckyList", Operate(/*false,*/ listLucky, SLevel::super | SLevel::owner | SLevel::manager));
+	options.addCommand("ListLucky", options.getOperate("showLuckyList"));
+	options.addCommand("help", Operate(/*false,*/ help,SLevel::all));
 	return;
 }
 
@@ -51,7 +52,7 @@ std::string help(const Argus& arg, GroupID group, UserID user)
 		reply += "欢迎使用随机抽签系统\n";
 		reply += "所有命令前需带'#'\n";
 		reply += "通用格式为：\"#命令 参数\"\n";
-		reply += "此外，您可以使用以下命令：";
+		reply += "此外，您可以使用以下命令:\n";
 		CommendList tempList = options.getCommendList();
 		for (auto it = tempList.begin(); it != tempList.end(); it++)
 		{
@@ -85,11 +86,11 @@ std::string start(const Argus& arg, GroupID groupid, UserID user)
 	else
 	{
 		std::map<GroupID, Group>::iterator iter_group = groups.find(groupid);
-		if (iter_group != groups.end())
+		if (iter_group != groups.end())//检查是否存在群聊的记录
 		{
-			srand((unsigned int)time(NULL));
-			Group& currentGroup = iter_group->second;
-			std::vector<Member> randlist;
+			srand((unsigned int)time(NULL));//设置随机种子
+			Group& currentGroup = iter_group->second;//建立引用方便调用.
+			std::vector<Member> randlist;//预计的受害者名单
 			int num = 0;
 			//currentGroup.chosen.clear();
 			for (auto u: currentGroup.getNameList(true))
@@ -149,7 +150,7 @@ std::string clear(const Argus& arg, GroupID groupid, UserID user)
 		{
 			id = groupid;
 		}
-		if (options.isAdmin(user,groupid, true))
+		if (options.getSuperviserLevel(user,groupid)&SLevel::super)//Double check
 		{
 			try
 			{
@@ -314,4 +315,40 @@ std::string listLucky(const Argus & arg, GroupID groupid, UserID user)
 		}
 	}
 	return Reply;
+}
+
+std::string removeMember(const Argus& arg, GroupID groupid, UserID user)
+{
+	std::string Reply;
+	CQ_addLog(ac, CQLOG_DEBUG, "funrun", "removeMember");
+	if (arg.size() > 2)
+	{
+		std::stringstream Op;
+		bit::BigInt j;
+		std::map<int64_t, Group>::iterator iter_group = groups.find(groupid);
+		if (iter_group != groups.end())
+		{
+			Group& currentGroup = iter_group->second;
+			for (size_t i = 2; i < arg.size(); i++)
+			{
+				Op << arg[i];
+				Op >> j;
+				currentGroup.removeMember(Member(j));
+			}
+			Reply += "";
+		}
+		else
+		{
+			Reply += "";
+		}
+	}
+	else
+	{
+		
+	}
+}
+
+std::string setChooseable(const Argus& arg, GroupID groupid, UserID user)
+{
+	return std::string();
 }

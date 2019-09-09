@@ -1,5 +1,6 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include"Frame.h"
+Operate notOperate(/*false,*/ voidOperate, SLevel::all);
 Options options;
 
 bool isManager(UserID user)
@@ -31,7 +32,7 @@ std::string noThing(const Argus& arg, GroupID group, UserID user)
 	return Reply;
 }
 
-std::string voidOperate(const std::string & msg, GroupID group, UserID user)
+std::string voidOperate(const std::string& msg, GroupID group, UserID user)
 {
 	std::string Reply;
 	CQ_addLog(ac, CQLOG_DEBUG, "voidCOMMEND", ("user=" + std::to_string(user) + ";InGroup:" + std::to_string(group) + "withCOMMEND:" + msg).c_str());
@@ -42,8 +43,14 @@ std::string voidOperate(const std::string & msg, GroupID group, UserID user)
 	return Reply;
 }
 
+std::string voidOperate(const Argus& arg, GroupID group, UserID user)
+{
+	return voidOperate(arg.size() ? arg[0] : "", group, user);
+}
 
-Operate::Operate(/*int id, */bool na, Function function) :/*ID(id), */needAdmin(na), needSuperviser(false), function(function)
+
+Operate::Operate(/*int id, bool na,*/ Function function, SuperviserLevel superviserLevelNeeded) :
+	/*ID(id), needAdmin(na), needSuperviser(false), */function(function), superviserLevelNeeded(superviserLevelNeeded)
 {
 	;
 }
@@ -51,7 +58,7 @@ Operate::Operate(/*int id, */bool na, Function function) :/*ID(id), */needAdmin(
 std::string Operate::excute(const std::string& msg, GroupID group, UserID user)
 {
 	CQ_addLog(ac, CQLOG_DEBUG, "Frame", "excute");
-	if (function != NULL && (!needAdmin || options.isAdmin(user,group, needSuperviser)))
+	if (function != NULL && (superviserLevelNeeded & options.getSuperviserLevel(user, group)))
 	{
 		std::string arg;
 		std::stringstream ss;
@@ -66,7 +73,7 @@ std::string Operate::excute(const std::string& msg, GroupID group, UserID user)
 		{
 			Reply += function(argus, group, user);
 		}
-		catch (const std::exception & e)
+		catch (const std::exception& e)
 		{
 			Reply += e.what();
 		}
@@ -79,6 +86,11 @@ std::string Operate::excute(const std::string& msg, GroupID group, UserID user)
 
 }
 
+//Function Operate::getFunction(void)
+//{
+//	return function;
+//}//abanded
+
 
 
 void Options::addCommand(const std::string& command, Operate op)
@@ -86,6 +98,19 @@ void Options::addCommand(const std::string& command, Operate op)
 	Locker lock(operateLock);
 	operates.insert(std::pair<std::string, Operate>(command, op));
 	return;
+}
+
+Operate Options::getOperate(const std::string& command)
+{
+	if (isCommand(command))
+	{
+		Locker lock(operateLock);
+		return operates[command];
+	}
+	else
+	{
+		return notOperate;
+	}
 }
 
 CommendList Options::getCommendList(void)
@@ -103,7 +128,7 @@ std::string Options::tryExcuteCommend(const std::string& commend, const std::str
 	}
 	else
 	{
-		return voidOperate(commend,group,user);
+		return voidOperate(commend, group, user);
 
 	}
 }
@@ -127,10 +152,23 @@ bool Options::isAdmin(UserID user, GroupID group, bool needSuperviser)
 	return  (admins.find(user) != admins.end()) || !needSuperviser && isManager(user);
 }
 
-
-Member::Member(bit::BigInt id, std::string n):studentID(id),name(n)
+SuperviserLevel Options::getSuperviserLevel(UserID user, GroupID group)
 {
-	canBeChose = true;
+	SuperviserLevel level = SLevel::none;
+	{
+		level |= SLevel::member;
+	}
+	{
+		Locker lock(adminLock);
+		level |= (admins.find(user) != admins.end()) ? SLevel::super : SLevel::none;
+	}
+	return level;
+}
+
+
+Member::Member(bit::BigInt id, std::string n) :studentID(id), name(n)
+{
+	canBeChoose = true;
 }
 
 bool Member::operator < (const Member b)const
@@ -148,9 +186,14 @@ std::string Member::getName(void)const
 	return name;
 }
 
-bool Member::choseable(void)const
+bool Member::getChooseAble(void)const
 {
-	return canBeChose;
+	return canBeChoose;
+}
+
+void Member::setChooseAble(bool Op)
+{
+	canBeChoose = Op;
 }
 
 
@@ -170,13 +213,23 @@ void Group::removeMember(Member member)
 	nameList.erase(member);
 }
 
+size_t Group::setChooseAble(Member member, bool chooseable)
+{
+	
+}
+
+size_t Group::setChooseAble(NameList list, bool chooseable)
+{
+	return size_t();
+}
+
 NameList Group::getNameList(bool needChoseable)
 {
 	Locker lock(thisLock);
 	NameList tempList;
-	for (auto u:nameList)
+	for (auto u : nameList)
 	{
-		if (!needChoseable||u.choseable())
+		if (!needChoseable || u.getChooseAble())
 		{
 			tempList.insert(u);
 		}
@@ -191,14 +244,14 @@ size_t Group::size(void)
 
 bool Group::isLucky(bit::BigInt stuID)
 {
-	for (auto u:chosen)
+	if (chosen.find(Member(stuID)) != chosen.end())
 	{
-		if (u.getID() == stuID.string())
-		{
-			return true;
-		}
+		return true;
 	}
-	return false;
+	else
+	{
+		return false;
+	}
 }
 
 NameList Group::getChosen(void)
